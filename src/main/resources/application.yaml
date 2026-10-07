@@ -1,3 +1,28 @@
 spring:
   application:
     name: plateforme
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/plateforme_db
+    username: ${DB_APP_USERNAME}
+    password: ${DB_APP_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://localhost:5432/plateforme_db
+    user: ${DB_MIGRATION_USERNAME}
+    password: ${DB_MIGRATION_PASSWORD}
+    locations:
+      - classpath:db/migration
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 300000   # 5-minutes

@@ -20,6 +20,7 @@ public class CommercantService {
     private final CommercantRepository commercantRepository;
     private final SiteRepository siteRepository;
     private final TenantDatabaseProvisioner tenantDatabaseProvisioner;
+    private final TenantFlywayMigrator tenantFlywayMigrator;
 
     @Transactional
     public Commercant create(CreateCommercantRequest request) {
@@ -41,6 +42,10 @@ public class CommercantService {
         String matricule = generateMatricule();
 
         String databaseName = generateDatabaseName(request.sousDomaine());
+
+        tenantDatabaseProvisioner.createDatabase(databaseName);
+
+        tenantFlywayMigrator.migrate(databaseName);
 
         // Création réelle de la base PostgreSQL du tenant
         tenantDatabaseProvisioner.createDatabase(databaseName);

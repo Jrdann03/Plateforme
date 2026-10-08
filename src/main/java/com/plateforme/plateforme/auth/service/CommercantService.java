@@ -19,6 +19,7 @@ public class CommercantService {
 
     private final CommercantRepository commercantRepository;
     private final SiteRepository siteRepository;
+    private final TenantDatabaseProvisioner tenantDatabaseProvisioner;
 
     @Transactional
     public Commercant create(CreateCommercantRequest request) {
@@ -40,6 +41,9 @@ public class CommercantService {
         String matricule = generateMatricule();
 
         String databaseName = generateDatabaseName(request.sousDomaine());
+
+        // Création réelle de la base PostgreSQL du tenant
+        tenantDatabaseProvisioner.createDatabase(databaseName);
 
         Commercant commercant = Commercant.builder()
                 .uid(uid)

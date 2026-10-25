@@ -19,36 +19,31 @@ public class CommercantService {
 
     private final CommercantRepository commercantRepository;
     private final SiteRepository siteRepository;
-    private final TenantDatabaseProvisioner tenantDatabaseProvisioner;
+    private final TenantSchemaProvisioner tenantSchemaProvisioner; // Changé ici
     private final TenantFlywayMigrator tenantFlywayMigrator;
 
     @Transactional
     public Commercant create(CreateCommercantRequest request) {
 
         if (commercantRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException(
-                    "Un commerçant existe déjà avec cet email."
-            );
+            throw new IllegalArgumentException("Un commerçant existe déjà avec cet email.");
         }
 
         if (commercantRepository.existsBySousDomaine(request.sousDomaine())) {
-            throw new IllegalArgumentException(
-                    "Ce sous-domaine est déjà utilisé."
-            );
+            throw new IllegalArgumentException("Ce sous-domaine est déjà utilisé.");
         }
 
         UUID uid = UUID.randomUUID();
-
         String matricule = generateMatricule();
 
-        String databaseName = generateDatabaseName(request.sousDomaine());
+        // On génère le nom du schéma (ex: tenant_boutique1)
+        String schemaName = generateSchemaName(request.sousDomaine());
 
-        tenantDatabaseProvisioner.createDatabase(databaseName);
+        // 1. On crée le schéma dans la base unique
+        tenantSchemaProvisioner.createSchema(schemaName);
 
-        tenantFlywayMigrator.migrate(databaseName);
-
-        // Création réelle de la base PostgreSQL du tenant
-        tenantDatabaseProvisioner.createDatabase(databaseName);
+        // 2. On applique les migrations Flyway dedans
+        tenantFlywayMigrator.migrate(schemaName);
 
         Commercant commercant = Commercant.builder()
                 .uid(uid)
@@ -59,7 +54,7 @@ public class CommercantService {
                 .telephone(request.telephone())
                 .adresse(request.adresse())
                 .sousDomaine(request.sousDomaine())
-                .databaseName(databaseName)
+                .databaseName(schemaName) // On stocke le nom du schéma ici
                 .status(CommercantStatus.ACTIVE)
                 .build();
 
@@ -73,10 +68,13 @@ public class CommercantService {
                 .build();
 
         siteRepository.save(site);
-
         commercant.setSite(site);
 
         return commercant;
+    }
+
+    private String generateSchemaName(String sousDomaine) {
+        return "tenant_" + sousDomaine.toLowerCase().replaceAll("-", "_");
     }
 
     private String generateMatricule() {

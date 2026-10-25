@@ -11,13 +11,13 @@ public class TenantFlywayMigrator {
 
     private final TenantProvisioningProperties properties;
 
-    public void migrate(String databaseName) {
-
+    public void migrate(String schemaName) {
+        // On pointe toujours vers la base principale (plateforme_db)
         String jdbcUrl = String.format(
                 "jdbc:postgresql://%s:%d/%s",
                 properties.host(),
                 properties.port(),
-                databaseName
+                properties.database() // Base centrale
         );
 
         Flyway flyway = Flyway.configure()
@@ -26,6 +26,7 @@ public class TenantFlywayMigrator {
                         properties.username(),
                         properties.password()
                 )
+                .schemas(schemaName) // <-- C'est ici qu'on indique à Flyway d'utiliser le schéma du client
                 .locations("classpath:db/tenant-migration")
                 .load();
 

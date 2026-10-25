@@ -1,4 +1,4 @@
-package com.plateforme.plateforme.auth.service;
+/*package com.plateforme.plateforme.auth.service;
 
 import com.plateforme.plateforme.auth.config.TenantProvisioningProperties;
 import lombok.RequiredArgsConstructor;
@@ -94,4 +94,4 @@ public class TenantDatabaseProvisioner {
             );
         }
     }
-}
+}*/

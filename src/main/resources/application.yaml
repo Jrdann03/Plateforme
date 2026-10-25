@@ -29,9 +29,9 @@ tenant:
   provisioning:
     host: localhost
     port: 5432
-    database: postgres
-    username: ${DB_PROVISIONER_USERNAME}
-    password: ${DB_PROVISIONER_PASSWORD}
+    database: plateforme_db  # <-- Remplace "postgres" par "plateforme_db"
+    username: ${DB_SCHEMA_USERNAME}  # Tu peux réutiliser ton utilisateur principal s'il a les droits sur la base
+    password: ${DB_SCHEMA_PASSWORD}
 
 jwt:
   secret: ${JWT_SECRET}

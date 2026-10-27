@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // SEULE la route d'inscription des commerçants est publique
-                        .requestMatchers(HttpMethod.POST, "/api/commercants").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/token", "/api/commercants").permitAll()
 
                         // TOUTES les autres routes (existantes et futures) exigent un JWT
                         .anyRequest().authenticated()

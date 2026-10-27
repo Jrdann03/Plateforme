@@ -85,7 +85,4 @@ public class CommercantService {
                         .toUpperCase();
     }
 
-    private String generateDatabaseName(String sousDomaine) {
-        return "tenant_" + sousDomaine.toLowerCase();
-    }
 }

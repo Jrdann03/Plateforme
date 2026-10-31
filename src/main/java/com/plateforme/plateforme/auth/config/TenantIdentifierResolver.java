@@ -9,7 +9,14 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
     @Override
     public String resolveCurrentTenantIdentifier() {
         String tenant = TenantContext.getCurrentTenant();
-        return (tenant != null) ? tenant : "public";
+        String currentThread = Thread.currentThread().getName();
+
+        System.out.println(">>> [RESOLVER] Thread: " + currentThread + " | Tenant lu depuis TenantContext : " + tenant);
+
+        if (tenant != null && !tenant.isBlank()) {
+            return tenant;
+        }
+        return "public";
     }
 
     @Override

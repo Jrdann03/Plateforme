@@ -19,33 +19,43 @@ public class TenantFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String serverName = request.getServerName(); // ex: boutique1.localhost ou boutique1.monsite.com
+        String requestUri = request.getRequestURI();
+        String method = request.getMethod();
+        String headerTenant = request.getHeader("X-Tenant-Subdomain");
+
+        System.out.println(">>> [REQUÊTE] " + method + " " + requestUri + " | Header X-Tenant-Subdomain : " + headerTenant);
+
+        String serverName = request.getServerName();
         String tenantSchema = resolveTenantFromHeaderOrDomain(request, serverName);
+
+        System.out.println(">>> [DEBUG] tenantSchema calculé avant le if : " + tenantSchema);
 
         try {
             if (tenantSchema != null && !tenantSchema.isBlank()) {
+                System.out.println(">>> [DEBUG] Passage dans le IF -> Application de : " + tenantSchema);
                 TenantContext.setCurrentTenant(tenantSchema);
             } else {
-                TenantContext.setCurrentTenant("public"); // Schéma par défaut pour la plateforme centrale
+                System.out.println(">>> [DEBUG] Passage dans le ELSE -> Application de : public");
+                TenantContext.setCurrentTenant("public");
             }
+
+            System.out.println(">>> [FILTER CHECK] Juste après setCurrentTenant, get() vaut : " + TenantContext.getCurrentTenant());
+
             filterChain.doFilter(request, response);
         } finally {
-            TenantContext.clear(); // Très important pour éviter les fuites de mémoire entre threads
+            TenantContext.clear();
         }
     }
 
     private String resolveTenantFromHeaderOrDomain(HttpServletRequest request, String serverName) {
-        // Option 1 : Permettre de tester via un Header HTTP (très pratique en dev/Postman avec "X-Tenant-Subdomain")
         String headerTenant = request.getHeader("X-Tenant-Subdomain");
         if (headerTenant != null && !headerTenant.isBlank()) {
             return "tenant_" + headerTenant.toLowerCase().replaceAll("-", "_");
         }
 
-        // Option 2 : Extraire du sous-domaine (ex: boutique1.localhost -> sous-domaine = boutique1)
         String[] parts = serverName.split("\\.");
         if (parts.length > 2 || (parts.length == 2 && parts[1].equals("localhost"))) {
             String subDomain = parts[0];
-            // Ignore les sous-domaines techniques de base si besoin (ex: www, api)
             if (!subDomain.equalsIgnoreCase("www") && !subDomain.equalsIgnoreCase("api")) {
                 return "tenant_" + subDomain.toLowerCase().replaceAll("-", "_");
             }

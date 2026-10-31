@@ -9,12 +9,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none #validate
+      ddl-auto: none
     open-in-view: false
     properties:
       hibernate:
         format_sql: true
-        multiTenancy: SCHEMA
+        # On supprime les anciennes propriétés multiTenancy complexes si elles bloquaient,
+        # ou on laisse juste notre filtre propager le TenantContext.
 
 
   flyway:
@@ -35,4 +36,4 @@ tenant:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 300000   # 5-minutes
+  expiration: 300000   # 5-minutes #1mn = 60s et 1s = 1000millisecondes donc =>temps en ms = mn * 60s * 1000millisecondes
